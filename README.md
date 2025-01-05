@@ -1,15 +1,15 @@
-
 # Pneumonia Detection and Analysis System
 
 ## Overview
 
-This project implements an AI-powered Pneumonia Detection and Analysis System using a Convolutional Neural Network (CNN). The system is designed to detect pneumonia from chest X-ray images, providing detailed analysis and predictions using Groq Vision for medical image interpretation. The system also offers a user-friendly conversational interface using Chainlit for seamless interaction.
+[](Images/1.png)
+
+This project implements an AI-powered Pneumonia Detection and Analysis System using a Convolutional Neural Network (CNN). The system is designed to detect pneumonia from chest X-ray images, providing predictions and detailed analysis through an interactive user interface built with **Streamlit**.
 
 ## Features
 
 - **Pneumonia Detection**: Utilizes a custom-trained CNN model to detect pneumonia in chest X-ray images with high accuracy.
-- **Detailed Image Analysis**: Groq Vision provides advanced image analysis and text-based explanations.
-- **Conversational UI**: Built using Chainlit for a smooth user experience.
+- **Interactive User Interface**: Built using **Streamlit** for a seamless and user-friendly experience.
 - **Security**: Implements AES-256 encryption for image data to comply with HIPAA regulations.
 
 ## Project Structure
@@ -24,11 +24,11 @@ pneumonia-detection/
 ├── models/                       # Directory for trained models
 │   ├── pneumonia_cnn.pth         # Custom-trained CNN model
 │   └── pretrained_model.pth      # Pre-trained model (e.g., ResNet)
-├── pneumoniaCNN.ipynb                          
+├── pneumoniaCNN.ipynb                           
 ├── data_loader.py            
 ├── CNN.py                  
 ├── train.py                                        
-├── UI.py                         # Conversational UI using Chainlit
+├── UI.py                         # Interactive UI using Streamlit
 ├── pipeline.py                   # Pipeline for training and inference                  
 ├── Dockerfile                    # Docker configuration for containerized app
 ├── requirements.txt              # Python dependencies
@@ -41,8 +41,7 @@ pneumonia-detection/
 
 - Python 3.8+
 - PyTorch
-- Groq Vision SDK
-- Chainlit
+- Streamlit
 
 ### Setup Instructions
 
@@ -59,16 +58,17 @@ pneumonia-detection/
    pip install -r requirements.txt
    ```
 
-3. Set up Groq Vision API credentials and Chainlit configuration (refer to their documentation for setup).
-
 ### Running the Application
 
-- To run the application locally with UI integration:
+- To run the application locally with the **Streamlit** UI:
 
   ```bash
-  Chainlit run UI.py
+  streamlit run UI.py
   ```
-- To run the pipeline for Training Model:
+
+[](Images/2.png)
+
+- To run the pipeline for training the model:
   
   ```bash
   python pipeline.py
@@ -76,7 +76,11 @@ pneumonia-detection/
 
 ## Model Details
 
+[](Images/3.png)
+
 The system employs the `PneumoniaCNN` architecture, a custom-built CNN with three convolutional blocks and a fully connected layer. The model is trained using chest X-ray images, and both custom and pretrained models (such as ResNet) are available for comparison.
+
+[](Images/4.png)
 
 - **Custom Model Accuracy**:
   - Training Accuracy: 85%
@@ -84,12 +88,6 @@ The system employs the `PneumoniaCNN` architecture, a custom-built CNN with thre
 
 - **Pretrained Model Accuracy**:
   - Testing Accuracy: 90%
-
-## API Integration
-
-### Groq Vision
-
-The system integrates with Groq Vision to provide detailed text-based explanations of the analysis. The analysis includes highlighting areas of the X-ray that show potential signs of pneumonia, improving the interpretability of the AI system for medical professionals.
 
 ## Security and Privacy
 
@@ -109,7 +107,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Acknowledgments
 
 - PyTorch: For building the deep learning models.
-- Groq Vision: For advanced image analysis.
-- Chainlit: For creating the conversational UI.
+- Streamlit: For creating the interactive UI.
 
---- 
+---

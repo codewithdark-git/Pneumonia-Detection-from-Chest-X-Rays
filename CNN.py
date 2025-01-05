@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torchvision
+from torchvision import models
 
 class PneumoniaCNN(nn.Module):
     """
@@ -18,8 +18,8 @@ class PneumoniaCNN(nn.Module):
         # Pretrained layers (using a part of a ResNet or VGG model)
         if pretrained:
             # For example, you can load ResNet18 pretrained on ImageNet
-            self.resnet = torchvision.models.resnet18(pretrained=True)
-            self.resnet.fc = nn.Linear(self.resnet.fc.in_features, 2)  
+            self.mobilenet = models.mobilenet(pretrained=True)
+            self.mobilenet.fc = nn.Linear(self.resnet.fc.in_features, 2)  
         else:
             # Convolutional layers with Batch Normalization
             self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)
@@ -49,8 +49,8 @@ class PneumoniaCNN(nn.Module):
         Returns:
             torch.Tensor: Output logits of shape (batch_size, 2)
         """
-        if hasattr(self, 'resnet'):  # If using pre-trained model
-            return self.resnet(x)
+        if hasattr(self, 'mobilenet'):  # If using pre-trained model
+            return self.mobilenet(x)
 
         # Convolutional block 1
         x = self.conv1(x)

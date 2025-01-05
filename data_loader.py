@@ -20,16 +20,25 @@ def load_dataset(main_dir, batch_size):
 
     # Define transformations for training, validation, and testing
     train_transform = transforms.Compose([
-        transforms.RandomResizedCrop(224),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=imagenet_mean, std=imagenet_std)
+                transforms.RandomRotation(30),
+                transforms.RandomHorizontalFlip(),
+                transforms.RandomResizedCrop(224),
+                transforms.Grayscale(num_output_channels=3),
+                transforms.ToTensor(),
+                transforms.transforms.Normalize(
+                                mean=[-m / s for m, s in zip(imagenet_mean, imagenet_std)],
+                                std=[1 / s for s in imagenet_std]
+                            )  # ImageNet stats
     ])
 
     test_transform = transforms.Compose([
-        transforms.Resize((224, 224)),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=imagenet_mean, std=imagenet_std)
+                transforms.Resize((224, 224)),
+                transforms.Grayscale(num_output_channels=3), 
+                transforms.ToTensor(),
+                transforms.transforms.Normalize(
+                                mean=[-m / s for m, s in zip(imagenet_mean, imagenet_std)],
+                                std=[1 / s for s in imagenet_std]
+                            ) # ImageNet stats
     ])
 
     # Paths to subdirectories

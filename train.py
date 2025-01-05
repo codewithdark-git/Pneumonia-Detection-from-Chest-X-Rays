@@ -12,8 +12,8 @@ import logging
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
 import itertools
-import makedot
-
+from torchviz import make_dot
+from torchsummary import summary
 
 
 class PneumoniaTrainer:
@@ -43,7 +43,7 @@ class PneumoniaTrainer:
         print(f"""
               
                 ****************************************
-                ||=    Training MelanomaClassifier
+                ||=    Training PneumoniaTrainer
                 ||=    -------------------------------
                 ||=    Batch size: {self.batch_size}
                 ||=    Learning rate: {self.learning_rate}
@@ -161,12 +161,12 @@ class PneumoniaTrainer:
         plt.savefig('Images/training_validation_accuracy.png')
         plt.show()
 
-    def save_model(self, path):
+    def save_model(self):
         """
         Save the trained model to a specified path.
         """
-        torch.save(self.model, path)
-        print(f"Model saved successfully at {path}")
+        torch.save(self.net, self.model_path)
+        print(f"Model saved successfully at {self.model_path}")
 
     def archit(self):
         """
@@ -192,11 +192,11 @@ class PneumoniaTrainer:
         test_labels = []
         predicted_labels = []
 
-        self.model.eval()
+        self.net.eval()
         with torch.no_grad():
             for inputs, labels in loader:
                 inputs = inputs.to(self.device)
-                outputs = self.model(inputs)
+                outputs = self.net(inputs)
                 _, preds = torch.max(outputs, 1)
                 test_labels.extend(labels.cpu().numpy())
                 predicted_labels.extend(preds.cpu().numpy())

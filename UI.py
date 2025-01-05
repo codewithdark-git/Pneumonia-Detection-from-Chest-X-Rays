@@ -3,11 +3,16 @@ from torchvision import transforms
 from PIL import Image
 import logging
 from pathlib import Path
-import chainlit as cl
-from groq import Groq
+import streamlit as st
 import base64
 from typing import Optional, Tuple
-from CNN import PneumoniaCNN
+import os
+import g4f  # Import the g4f module (or adapt if needed)
+from g4f.client import Client
+import asyncio  # Import asyncio
+
+
+
 
 # Configure logging
 logging.basicConfig(
@@ -23,7 +28,7 @@ class XRayAnalyzer:
     def __init__(self):
         self.model = self._load_model()
         self.transform = self._get_transforms()
-        self.groq_model = Groq()
+        self.client = Client()
 
     def _load_model(self) -> torch.nn.Module:
         """Load and initialize the PyTorch model."""
@@ -39,7 +44,7 @@ class XRayAnalyzer:
             return model
 
         except Exception as e:
-            logger.error('')
+            logger.error(f"Model loading error: {str(e)}")
 
     @staticmethod
     def _get_transforms():
@@ -72,116 +77,63 @@ class XRayAnalyzer:
             logger.error(f"Prediction error: {str(e)}")
             raise RuntimeError("Error during model prediction.")
 
-    async def analyze_with_groq(self, image_path: str, prompt: Optional[str] = None) -> str:
-        """
-        Analyze image using Groq Vision.
-        
-        Args:
-            image_path: Path to the image file
-            prompt: Optional user prompt to guide the analysis
-        """
-        try:
-            # Encode image to base64
-            with open(image_path, "rb") as image_file:
-                base64_image = base64.b64encode(image_file.read()).decode('utf-8')
+    
+def main():
+    st.title("Pneumonia Detection Chatbot")
 
-            # Prepare message with or without custom prompt
-            message_text = prompt if prompt else "Analyze this chest X-ray image in detail. Describe any visible abnormalities or signs of pneumonia."
-            
-            # Create chat completion request
-            chat_completion = self.groq_model.chat.completions.create(
-            messages=[
-                {
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": message_text},
-                    {
-                    "type": "image_url",
-                    "image_url": {
-                        "url": f"data:image/jpeg;base64,{base64_image}",
-                    },
-                    },
-                ],
-                }
-            ],
-            model="llama-3.2-11b-vision-preview",
-            )
-            
-            return chat_completion.choices[0].message.content
-            
-        except Exception as e:
-            logger.error(f"Groq analysis error: {str(e)}")
-            return "Error in generating detailed analysis using Groq Vision."
+    # Greet the user
+    st.write("Welcome to the Pneumonia Detection Chatbot! Please upload a chest X-ray image.")
 
-    async def generate_combined_response(self, image_path: str, user_prompt: Optional[str] = None) -> str:
-        """
-        Generate a combined response using PyTorch and Groq Vision models.
-        """
-        try:
-            # Step 1: Get prediction from PyTorch model
-            prediction, confidence = self.predict_with_torch(image_path)
+    st.markdown('''#### **⚠️ WARNING! DISCLAIMER! ⚠️**
+        This tool is for **demonstration purposes only** and should
+    **not** be used for medical decision-making. Consult with a qualified 
+    healthcare provider for any medical concerns regarding melanoma or skin lesions.''')
 
-            # Step 2: Get detailed analysis from Groq Vision
-            groq_insights = await self.analyze_with_groq(image_path, prompt=user_prompt)
 
-            # Step 3: Combine results
-            response = (
-                f"### Prediction\n"
-                f"**The X-ray indicates:** {prediction} (Confidence: {confidence:.2%})\n\n"
-                f"### Detailed Analysis\n"
-                f"{groq_insights}\n\n"
-                f"### Disclaimer\n"
-                f"⚠️ This is an AI-assisted analysis. Please consult a medical professional for accurate diagnosis."
-            )
-            return response
-        except Exception as e:
-            logger.error(f"Error generating response: {str(e)}")
-            return "An error occurred during analysis. Please try again."
+    # Create temp directory if it doesn't exist
+    temp_dir = "temp"
+    if not os.path.exists(temp_dir):
+        os.makedirs(temp_dir)
 
-@cl.on_chat_start
-async def upload_image_ui():
-    """
-    Chainlit UI for image upload and analysis.
-    """
-    analyzer = XRayAnalyzer()
+    # File upload for chest X-ray image
+    uploaded_file = st.file_uploader("Upload Chest X-ray Image", type=["jpg", "jpeg", "png"])
 
-    try:
-        # Step 1: File upload
-        uploaded_file = await cl.FileUpload(
-            label="Upload your chest X-ray image",
-            accept=["image/jpeg", "image/png"]
-        )
-        if not uploaded_file:
-            await cl.Message(content="❌ No file uploaded. Please upload an image.").send()
-            return
-        
-        await cl.Message('''Welcome to the Pneumonia Detection Chatbot!
-                         ''').send()
+    if uploaded_file is not None:
+        # Save uploaded file to local disk temporarily in the 'temp' directory
+        image_path = os.path.join(temp_dir, uploaded_file.name)
+        with open(image_path, "wb") as f:
+            f.write(uploaded_file.getbuffer())
 
-        image_path = uploaded_file.path
-        if not Path(image_path).exists():
-            await cl.Message(content="❌ Invalid file. Please upload a valid image.").send()
-            return
+        st.markdown('----')
+       
+        col1, col2 = st.columns(2)  # Create two columns
 
-        await cl.Message(content="✅ Image uploaded successfully!").send()
+        # Display the image in the first column
+        with col1:
+            st.image(image_path, caption="Uploaded Image")
+            st.toast("Image uploaded successfully!")
 
-        # Step 2: Optional user text input
-        user_prompt = await cl.Text(
-            label="Additional context or questions about the X-ray (optional)",
-            placeholder="e.g., Patient history, specific concerns, or questions"
-        )
+        # Create an instance of XRayAnalyzer and analyze the image
+        analyzer = XRayAnalyzer()
 
-        # Step 3: Analysis
-        with cl.Loading("Analyzing the image..."):
-            response = await analyzer.generate_combined_response(image_path, user_prompt)
+        with col2:
+            with st.spinner("Analyzing the X-ray..."):
+                try:
+                    
+                    prediction, confidence = analyzer.predict_with_torch(image_path)
 
-        # Step 4: Display results
-        await cl.Message(content=response).send()
+                    # Display the response (prediction and analysis)
+                    if prediction and confidence:
+                        st.metric(label="Prediction", value=prediction)  
+                        st.metric(label="Confidence", value=f"{confidence*100:.2f} %") 
+                    else:
+                        st.write("An error occurred. Could not make a prediction.")
 
-    except Exception as e:
-        error_message = f"An error occurred: {str(e)}"
-        logger.error(error_message)
-        await cl.Message(content=error_message).send()
+                except Exception as e:
+                    st.error(f"Error during analysis: {str(e)}")
+
+    else:
+        st.warning("Please upload an image to get started.")
 
 if __name__ == "__main__":
-    logger.info("Starting X-Ray Analysis System")
+    main()
