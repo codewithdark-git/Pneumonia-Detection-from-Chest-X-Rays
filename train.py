@@ -180,7 +180,7 @@ class PneumoniaTrainer:
         dot = make_dot(self.model(dummy_input), params=dict(self.model.named_parameters()))
         dot.render("Images/model_architecture", format="png")
         print("Model architecture saved as 'model_architecture.png'.")
-        self.logger.info("Model architecture saved as 'model_architecture.png'.")
+        logging.info("Model architecture saved as 'model_architecture.png'.")
 
     def plot_confusion_matrix(self, loader, classes, cmap=plt.cm.Blues):
         """
@@ -218,4 +218,4 @@ class PneumoniaTrainer:
         plt.tight_layout()
         plt.show()
         plt.savefig('Images/confusion_matrix.png')
-        self.logger.info("Confusion Matrix saved as 'confusion_matrix.png'.")
+        logging.info("Confusion Matrix saved as 'confusion_matrix.png'.")
