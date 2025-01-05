@@ -24,7 +24,8 @@ pneumonia-detection/
 ├── models/                       # Directory for trained models
 │   ├── pneumonia_cnn.pth         # Custom-trained CNN model
 │   └── pretrained_model.pth      # Pre-trained model (e.g., ResNet)
-├── pneumoniaCNN.ipynb                           
+├── pneumoniaCNN.ipynb
+├── transfer_learning.ipynb       # Transfer learning       
 ├── data_loader.py            
 ├── CNN.py                  
 ├── train.py                                        
