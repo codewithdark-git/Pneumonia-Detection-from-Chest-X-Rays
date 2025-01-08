@@ -21,7 +21,7 @@ torch.manual_seed(42)
 main_dir = 'chest_xray'  # Path to chest X-ray dataset
 batch_size = 16
 epochs = 5
-learning_rate = 0.1
+learning_rate = 0.001
 img_size = 224
 save_model_path = 'Model/model.pth'
 
@@ -43,7 +43,13 @@ model = model.to(device)
 print("Preparing training pipeline...")
 logging.info("Preparing training pipeline...")
 
-trainer = PneumoniaTrainer(model=model, img_size=224, batch_size=32, epochs=epochs,  learning_rate=learning_rate, model_name="PneumoniaCNN")
+trainer = PneumoniaTrainer(model=model,
+                            img_size=224, 
+                            batch_size=32,
+                            epochs=epochs,
+                            learning_rate=learning_rate, 
+                            model_name="PneumoniaCNN")
+
 
 # Train and evaluate
 print("Training model...")

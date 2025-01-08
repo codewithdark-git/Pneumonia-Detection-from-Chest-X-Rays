@@ -20,7 +20,15 @@ class PneumoniaTrainer:
     """
     A class for training a CNN model for pneumonia detection.
     """
-    def __init__(self, model, model_name, img_size=50, batch_size=100, learning_rate=0.001, epochs=2, model_path="Model/model.pth"):
+    def __init__(self, 
+                model,
+                model_name, 
+                img_size=50, 
+                batch_size=100, 
+                learning_rate=0.001, 
+                epochs=2, 
+                model_path="Model/model.pth"
+                ):
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.img_size = img_size
@@ -34,7 +42,7 @@ class PneumoniaTrainer:
         if model is None:
             raise ValueError("Please provide a valid model instance.")
         self.net = model.to(self.device)
-        self.optimizer = optim.Adam(self.net.parameters(), lr=self.learning_rate)
+        self.optimizer = optim.Adam(self.net.parameters(), lr=self.learning_rate, weight_delay=1)
         self.loss_function = nn.CrossEntropyLoss()
 
 
@@ -108,7 +116,6 @@ class PneumoniaTrainer:
     def summary_model(self):
         """Displays a summary of the model architecture."""
         return summary(self.net, input_size=(1, 224, 224), device=str(self.device))
-
 
     def plot_loss_accuracy(self):
         """
